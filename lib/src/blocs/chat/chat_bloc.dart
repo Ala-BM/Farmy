@@ -6,8 +6,10 @@ import 'package:farmy/src/models/messages.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class ChatBloc extends Bloc<ChatEvent, ChatState> {
+   StreamSubscription? _subscription;
   ChatBloc() : super(ChatInitial()) {
     on<LoadChatsEvent>(_onLoadChatsEvent);
+    on<ListenerMessagesEvent>(_onListenerMessangerEvent);
     on<LoadMessagesEvent>(_onLoadMessagesEvent);
     on<SendMessageEvent>(_onSendMessageEvent);
     on<NewChatEvent>(_onNewChatEvent);
@@ -97,5 +99,32 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     } catch (e) {
       emit(const ChatError("Failed to create new chat!"));
     }
+  }
+
+  Future<void> _onListenerMessangerEvent(ListenerMessagesEvent event, Emitter<ChatState> emit) async {
+     await _subscription?.cancel();
+
+     _subscription=FirebaseFirestore.instance
+          .collection("chats")  
+          .doc(event.chatId)  
+          .collection("messages") 
+          .snapshots().listen((snapshot){
+             if (snapshot.docs.isEmpty) {
+        emit(ChatEmpty());
+      } else {
+        add(LoadMessagesEvent(event.chatId));
+      }
+          },
+              onError: (error) {
+      if (!emit.isDone) {
+        emit(ChatError(error.toString()));
+      }
+    },
+          );
+  }
+    @override
+  Future<void> close() {
+    _subscription?.cancel();
+    return super.close();
   }
 }

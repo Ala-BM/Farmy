@@ -31,7 +31,7 @@ class _ChatScreenState extends State<ChatScreen> {
     super.initState();
     currentUserId = FirebaseAuth.instance.currentUser?.uid;
     if (currentUserId != null) {
-      context.read<ChatBloc>().add(LoadMessagesEvent(widget.chatId));
+      context.read<ChatBloc>().add(ListenerMessagesEvent(widget.chatId));
     }
   }
 

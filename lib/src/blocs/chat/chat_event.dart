@@ -14,6 +14,15 @@ class LoadMessagesEvent extends ChatEvent {
   List<Object> get props => [chatId];
 }
 
+class ListenerMessagesEvent extends ChatEvent {
+  final String chatId;
+
+  const ListenerMessagesEvent(this.chatId);
+
+  @override
+  List<Object> get props => [chatId];
+}
+
 class LoadChatsEvent extends ChatEvent {
   final String userId;
 
